@@ -1,0 +1,9 @@
+<group name="pass_the_hash,attack,windows_security,">
+  <rule id="100031" level="12">
+    <if_sid>92652</if_sid>
+    <description>Pass-the-Hash Attack Confirmed - Elevated Alert</description>
+    <mitre>
+      <id>T1550.002</id>
+    </mitre>
+  </rule>
+</group>
