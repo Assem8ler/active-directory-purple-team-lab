@@ -26,16 +26,65 @@ This project demonstrates an end-to-end Purple Teaming methodology:
 - **Detection**: Custom Wazuh rule analyzing Event ID 4769, specifically looking for `ticketOptions: 0x40810000` (RC4 request).
 - **MITRE ATT&CK**: [T1558.003](https://attack.mitre.org/techniques/T1558/003/) (Steal or Forge Kerberos Tickets: Kerberoasting)
 
-### 3. Pass-the-Hash (PtH)
-- **Attack**: Dumping local credentials via Impacket's `secretsdump.py` and using the NTLM hash to authenticate and execute commands remotely via `psexec.py`, achieving `NT AUTHORITY\SYSTEM` access without knowing the plaintext password.
+### 3. Credential Dumping
+- **Attack**: Extracting local SAM hashes and domain credentials from Windows 10 using Impacket's `secretsdump.py`.
+- **Detection**: Windows Event Log monitoring for suspicious remote registry access and credential extraction patterns.
+- **MITRE ATT&CK**: [T1003.001](https://attack.mitre.org/techniques/T1003/001/) (OS Credential Dumping: LSASS Memory)
+
+### 4. Pass-the-Hash (PtH)
+- **Attack**: Using the extracted NTLM hash to authenticate and execute commands remotely via `psexec.py`, achieving `NT AUTHORITY\SYSTEM` access without knowing the plaintext password.
 - **Detection**: Custom Wazuh child rule elevating the built-in rule 92652 to a critical level (12) upon detecting NTLM-based remote logons indicative of PtH.
 - **MITRE ATT&CK**: [T1550.002](https://attack.mitre.org/techniques/T1550/002/) (Use Alternate Authentication Material: Pass the Hash)
 
 ---
 
+## 📸 Proof of Execution
+
+### 🔴 Kerberoasting Attack (T1558.003)
+
+**Step 1: Capturing the Kerberos TGS hash**
+
+![Kerberoasting Attack](kerberoasting_attack.png)
+
+*Tool: `GetUserSPNs.py` from Impacket. Target: `svc_backup` service account. Result: Captured `$krb5tgs$18$` hash for offline cracking.*
+
+**Step 2: SIEM Detection — Custom Rule 100012 (Level 10 - High)**
+
+![Kerberoasting Alert](kerberoasting_alert.png)
+
+*Wazuh detected the RC4-HMAC ticket request (`ticketOptions: 0x40810000`) and triggered a high-severity alert with MITRE ATT&CK mapping.*
+
+---
+
+### 🔴 Credential Dumping (T1003.001)
+
+**Extracting NTLM hashes from Windows 10**
+
+![Credential Dumping](credential_dumping.png)
+
+*Tool: `secretsdump.py` from Impacket. Extracted local SAM hashes including the Admin account (SID 1002) used for the subsequent PtH attack.*
+
+---
+
+### 🔴 Pass-the-Hash Attack (T1550.002)
+
+**Step 1: Remote shell via psexec.py — NT AUTHORITY\SYSTEM**
+
+![PtH Attack](pth_attack.png)
+
+*Tool: `psexec.py` from Impacket. Used the extracted NTLM hash (`d96e919c...`) to authenticate as local Admin without the plaintext password. Achieved full SYSTEM shell on `DESKTOP-GC4JC66`.*
+
+**Step 2: SIEM Detection — Custom Rule 100031 (Level 12 - Critical)**
+
+![PtH Alert](pth_alert.png)
+
+*Wazuh detected 4 NTLM-based remote logons and triggered a critical-severity alert with MITRE ATT&CK mapping to T1550.002.*
+
+---
+
 ## ⚙️ Custom Detection Rules
 
-### Kerberoasting Detection
+### Kerberoasting Detection (`rules/kerberoasting_detection.xml`)
 ```xml
 <group name="sysmon,kerberoasting,attack,windows_security,">
   <rule id="100012" level="10">
