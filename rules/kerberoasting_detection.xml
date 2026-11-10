@@ -1,0 +1,11 @@
+<group name="sysmon,kerberoasting,attack,windows_security,">
+  <rule id="100012" level="10">
+    <if_sid>60106</if_sid>
+    <field name="win.system.eventID">^4769$</field>
+    <field name="win.eventdata.ticketOptions">0x40810000</field>
+    <description>Kerberos Service Ticket Requested with RC4 encryption - Possible Kerberoasting Attack</description>
+    <mitre>
+      <id>T1558.003</id>
+    </mitre>
+  </rule>
+</group>
