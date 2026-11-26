@@ -130,3 +130,18 @@ Child rule of built-in 92652; elevates NTLM-based remote logons to level 12. Ful
 ![PtH attack](pth_attack.png)
 
 ![PtH alert](pth_alert.png)
+
+---
+
+## 📌 Project status
+
+✅ Completed: lab deployment, AD attack simulation (Kerberoasting, credential dumping, PtH), custom detection rules, MITRE mapping, benign/malicious validation, evidence collection.
+
+## ⚠️ Disclaimer
+
+All attacks are performed in an isolated, closed VirtualBox host-only network for educational purposes only. Credentials and hashes exist solely inside the lab.
+
+## 🔗 Related projects
+
+- [MITRE ATT&CK Detection Coverage](https://github.com/Assem8ler/mitre-attack-detection-coverage)
+- [Wazuh SIEM Fundamentals](https://github.com/Assem8ler/wazuh-siem-fundamentals)
