@@ -67,7 +67,7 @@ _Tool: `secretsdump.py` from Impacket. Extracted local SAM hashes including the 
 
 **Step 1: Remote shell via psexec.py — NT AUTHORITY\SYSTEM**
 
-_Tool: `psexec.py` from Impacket. Used the extracted NTLM hash to authenticate as local Admin without the plaintext password. Achieved full SYSTEM shell (`SID S-1-5-18`) on `DESKTOP-GC4JC66`.
+_Tool: `psexec.py` from Impacket. Used the extracted NTLM hash to authenticate as local Admin without the plaintext password. Achieved full SYSTEM shell (`SID S-1-5-18`) on `DESKTOP-GC4JC66`. Note: PtH blocked by UAC Remote Restrictions policy on domain-joined machine; plaintext used for demonstration.
 
 **Step 2: SIEM Detection — Custom Rule 100031 (Level 12 - Critical)**
 
