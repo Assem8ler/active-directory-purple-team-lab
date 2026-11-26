@@ -97,3 +97,34 @@ This project demonstrates an end-to-end Purple Teaming methodology:
     </mitre>
   </rule>
 </group>
+
+---
+
+## ✅ Validation plan
+
+| # | Test (attack / benign) | Expected alert | Result |
+|---|------------------------|----------------|--------|
+| 1 | `GetUserSPNs.py` request TGS for `svc_backup` (RC4-HMAC) | 100012, level 10 | ✅ detected |
+| 2 | `secretsdump.py` against Windows 10 | credential-dumping telemetry (remote registry / SAM) | ✅ detected |
+| 3 | `psexec.py -hashes :<NTLM>` remote SYSTEM shell | 100031, level 12 | ✅ detected |
+| 4 | Benign: normal domain logon (Kerberos AES) from Win10 | NO 100012 / 100031 | ✅ no alert |
+
+## 🧠 Lessons learned
+
+- **Kerberoasting fidelity:** rule keys on `ticketOptions: 0x40810000` (RC4-HMAC) in Event 4769. Legitimate AES requests (`0x40810010`) do NOT fire → low false-positive rate.
+- **PtH severity separation:** child rule elevates built-in 92652 to level 12 only on NTLM-based remote logons; normal Kerberos logons stay at base severity.
+- **Chain correlation:** the same source IP across 4769 → 4624 (type 3) → 7045 lets you reconstruct the intrusion timeline (Kerberoast → dump → PtH).
+- **Lab hygiene:** isolated host-only network; hashes cracked offline only inside the lab.
+
+## 📸 Evidence gallery
+
+**Kerberoasting (T1558.003)** — attack + custom alert 100012:
+![Kerberoasting attack](kerberoasting_attack.png)
+![Kerberoasting alert](kerberoasting_alert.png)
+
+**Credential dumping (T1003.001)** — secretsdump output:
+![Credential dumping](credential_dumping.png)
+
+**Pass-the-Hash (T1550.002)** — SYSTEM shell + custom alert 100031:
+![PtH attack](pth_attack.png)
+![PtH alert](pth_alert.png)
